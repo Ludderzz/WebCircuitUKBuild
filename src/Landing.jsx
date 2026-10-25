@@ -21,14 +21,30 @@ const DESIGNS = [
 ];
 
 
+function Chips({ label, value, options, onPick }) {
+  return (
+    <div role="group" aria-label={label}>
+      <span className="lbl">{label}</span>
+      <div className="chips">
+        {options.map((o) => (
+          <button type="button" key={o} className={`chip${value === o ? ' on' : ''}`} aria-pressed={value === o} onClick={() => onPick(o)}>{o}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Waitlist() {
   const [f, setF] = useState({ name: '', email: '', trade: '', plan: 'Expert', timing: 'Within a month', contactEarly: 'Yes', website: '' });
   const [agree, setAgree] = useState(false);
+  const [step, setStep] = useState(1);
   const [state, setState] = useState({ status: 'idle', msg: '' });
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
+  const pick = (k) => (v) => setF({ ...f, [k]: v });
 
   async function submit(e) {
     e.preventDefault();
+    if (step === 1) return setStep(2);
     setState({ status: 'sending', msg: '' });
     try {
       const r = await fetch('/api/waitlist', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(f) });
@@ -44,32 +60,35 @@ function Waitlist() {
 
   return (
     <form className="card form" onSubmit={submit}>
-      <label>Your name<input value={f.name} onChange={set('name')} autoComplete="name" /></label>
-      <label>Email<input type="email" required value={f.email} onChange={set('email')} autoComplete="email" /></label>
-      <label>What is your business or trade?<input value={f.trade} onChange={set('trade')} placeholder="e.g. joiner, plumber, hair salon" /></label>
-      <label>Which plan interests you most?
-        <select value={f.plan} onChange={set('plan')}>
-          {PLANS.map((p) => <option key={p.name}>{p.name}</option>)}
-          <option>Not sure yet</option>
-        </select>
-      </label>
-      <label>How soon do you need a website?
-        <select value={f.timing} onChange={set('timing')}>
-          <option>As soon as possible</option><option>Within a month</option><option>Just exploring</option>
-        </select>
-      </label>
-      <label>Are you happy for us to contact you if you need it before our launch date?
-        <select value={f.contactEarly} onChange={set('contactEarly')}>
-          <option>Yes</option><option>No</option>
-        </select>
-      </label>
-      <label className="check">
-        <input type="checkbox" required checked={agree} onChange={(e) => setAgree(e.target.checked)} />
-        <span>I have read the <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
-      </label>
+      <div className="progress" role="img" aria-label={`Step ${step} of 2`}><i className="on" /><i className={step === 2 ? 'on' : ''} /></div>
+
+      {step === 1 && (
+        <>
+          <label>Email<input type="email" required value={f.email} onChange={set('email')} autoComplete="email" /></label>
+          <label>Your name <em>(optional)</em><input value={f.name} onChange={set('name')} autoComplete="name" /></label>
+          <label className="check">
+            <input type="checkbox" required checked={agree} onChange={(e) => setAgree(e.target.checked)} />
+            <span>I agree to the <a href="/terms" target="_blank" rel="noopener">Terms</a> and <a href="/privacy" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+          </label>
+          <button className="btn">Continue</button>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <label>Your business or trade <em>(optional)</em><input value={f.trade} onChange={set('trade')} placeholder="e.g. joiner, plumber, hair salon" autoComplete="off" /></label>
+          <Chips label="Which plan interests you most?" value={f.plan} options={[...PLANS.map((p) => p.name), 'Not sure yet']} onPick={pick('plan')} />
+          <Chips label="How soon do you need a website?" value={f.timing} options={['As soon as possible', 'Within a month', 'Just exploring']} onPick={pick('timing')} />
+          <Chips label="Are you happy for us to contact you if you need it before our launch date?" value={f.contactEarly} options={['Yes', 'No']} onPick={pick('contactEarly')} />
+          {state.status === 'error' && <p className="err" role="alert">{state.msg}</p>}
+          <div className="row">
+            <button type="button" className="btn ghost" onClick={() => setStep(1)}>Back</button>
+            <button className="btn" disabled={state.status === 'sending'}>{state.status === 'sending' ? 'Joining…' : 'Join the waitlist'}</button>
+          </div>
+        </>
+      )}
+
       <input className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" value={f.website} onChange={set('website')} name="website" />
-      {state.status === 'error' && <p className="err" role="alert">{state.msg}</p>}
-      <button className="btn" disabled={state.status === 'sending'}>{state.status === 'sending' ? 'Joining…' : 'Join the waitlist'}</button>
     </form>
   );
 }

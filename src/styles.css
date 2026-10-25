@@ -156,3 +156,14 @@ footer{padding-bottom:96px}
   .bar{grid-template-columns:96px 1fr 28px}
 }
 @media (prefers-reduced-motion:reduce){.modal{animation:none}}
+
+/* Two-step form */
+.progress{display:flex;gap:6px}
+.progress i{flex:1;height:4px;border-radius:2px;background:#2b2940}.progress i.on{background:var(--accent)}
+.lbl{display:block;font-weight:700;font-size:.92rem;margin-bottom:8px}
+label em{font-style:normal;font-weight:500;color:var(--soft)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:10px 16px;border-radius:999px;border:1px solid #3a3850;background:#0d0c12;color:#fff;font:600 .92rem Manrope,sans-serif;cursor:pointer}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.row{display:flex;gap:10px}.row .btn{flex:1}.row .btn:first-child{flex:0 0 auto}
+.modal .form{gap:14px}
