@@ -1,6 +1,6 @@
 // Fill these in before you launch. They appear in the Terms and Privacy Policy.
 const COMPANY = 'webCircuitUK';      // your registered business name
-const EMAIL = 'hello@example.com';   // where people can reach you, including to be removed
+const EMAIL = 'info@webcircuituk.com';   // where people can reach you, including to be removed
 const UPDATED = '25 October 2026';
 
 function Shell({ title, children }) {
