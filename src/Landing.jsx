@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PLANS } from './plans.js';
 
 const FEATURES = [
@@ -20,7 +20,6 @@ const DESIGNS = [
   ['Parallax', 'Scroll-driven showpiece', 'mock-parallax'],
 ];
 
-const go = (e) => { e.preventDefault(); document.getElementById('waitlist').scrollIntoView({ behavior: 'smooth' }); };
 
 function Waitlist() {
   const [f, setF] = useState({ name: '', email: '', trade: '', plan: 'Expert', timing: 'Within a month', contactEarly: 'Yes', website: '' });
@@ -75,14 +74,36 @@ function Waitlist() {
   );
 }
 
+function Modal({ onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = ''; };
+  }, [onClose]);
+  return (
+    <div className="overlay" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="wl-title">
+        <button className="x" onClick={onClose} aria-label="Close">×</button>
+        <h2 id="wl-title">Join the waitlist</h2>
+        <p className="muted-d">Early members get first access at launch.</p>
+        <Waitlist />
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
+  const [open, setOpen] = useState(false);
+  const openForm = () => setOpen(true);
+  const closeForm = () => setOpen(false);
   return (
     <>
       <header className="nav">
         <a className="logo" href="/">webCircuitUK</a>
         <nav>
           <a href="#how">How it works</a><a href="#designs">Designs</a><a href="#pricing">Pricing</a><a href="#custom">Custom</a>
-          <a className="btn sm" href="#waitlist" onClick={go}>Join waitlist</a>
+          <button type="button" className="btn sm" onClick={openForm}>Join waitlist</button>
         </nav>
       </header>
 
@@ -92,7 +113,7 @@ export default function Landing() {
         <h1>Your business online in minutes</h1>
         <p className="lead">Answer a few friendly questions. We build a fast, search-friendly website that fits your trade – with your logo, photos, reviews and a WhatsApp message form. No code, no AI guesswork.</p>
         <div className="cta">
-          <a className="btn" href="#waitlist" onClick={go}>Join the waitlist</a>
+          <button type="button" className="btn" onClick={openForm}>Join the waitlist</button>
           <a className="btn ghost" href="#custom">Custom coded website</a>
         </div>
         <ul className="pills"><li>No AI</li><li>SEO built in</li><li>3 designs</li><li>Edit any time</li></ul>
@@ -152,7 +173,7 @@ export default function Landing() {
                 <h3>{p.name}</h3><p className="muted-d">{p.tag}</p>
                 <div className="price">{p.price}{p.price !== 'Quote' && <small>/month</small>}</div>
                 <ul>{p.perks.map((x) => <li key={x}>{x}</li>)}</ul>
-                <a className="btn" href="#waitlist" onClick={go}>{p.name === 'Custom coded' ? 'Get a quote' : 'Join waitlist'}</a>
+                <button type="button" className="btn" onClick={openForm}>{p.name === 'Custom coded' ? 'Get a quote' : 'Join waitlist'}</button>
               </div>
             ))}
           </div>
@@ -173,6 +194,9 @@ export default function Landing() {
           <Waitlist />
         </div>
       </section>
+
+      {!open && <button type="button" className="bubble" onClick={openForm} aria-label="Join the waitlist"><span aria-hidden="true">✉</span> Join waitlist</button>}
+      {open && <Modal onClose={closeForm} />}
 
       <footer><span className="logo">webCircuitUK</span><span className="flinks"><a href="/terms">Terms</a><a href="/privacy">Privacy</a><span>© {new Date().getFullYear()} webCircuitUK</span></span></footer>
     </>
